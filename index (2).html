@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1020">
+<title>MARCK BOOK</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&display=swap">
+<style>
+:root{--bg:#f4f7fb;--sf:#fff;--tx:#10192e;--mu:#5b6783;--ac:#1f7fe0;--gr:#0fa56b;--ln:#d5ddea;--hl:#d8ecff}
+@media(prefers-color-scheme:dark){:root{--bg:#0a1020;--sf:#121a30;--tx:#e8eef8;--mu:#93a0bd;--ac:#3da5ff;--gr:#34e39b;--ln:#243252;--hl:#16345a;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;padding:env(safe-area-inset-top,0) 0 190px}
+header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--ln);position:sticky;top:0;background:var(--bg);z-index:5}
+.logo{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--bg);background:linear-gradient(135deg,var(--ac),var(--gr))}
+h1{font-size:18px;margin:0;letter-spacing:.02em}
+header small{color:var(--mu);margin-left:auto;max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+main{max-width:680px;margin:0 auto;padding:18px 16px}
+#drop{border:2px dashed var(--ln);border-radius:16px;padding:44px 20px;text-align:center;background:var(--sf)}
+#drop p{margin:6px 0;color:var(--mu)}
+#drop b{font-size:18px}
+button,select,input{font:inherit;color:inherit}
+.btn{background:var(--ac);color:var(--bg);border:0;border-radius:12px;padding:12px 20px;font-weight:600;cursor:pointer;margin-top:12px;display:inline-block}
+:focus-visible{outline:2px solid var(--gr);outline-offset:2px}
+#msg{color:var(--mu);text-align:center;margin-top:14px;min-height:22px}
+#lib{margin-top:22px}
+#lib h2{font-size:15px;margin:0 0 8px;color:var(--mu);font-weight:600}
+#lib div{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--ln)}
+#lib span{color:var(--mu);white-space:nowrap}
+#reader{display:none}
+#txt{font-family:Literata,Georgia,serif;font-size:19px;line-height:1.75;max-width:62ch;margin:0 auto}
+#txt p{margin:0 0 .8em;cursor:pointer;border-radius:6px;padding:2px 4px}
+#txt p.on{background:var(--hl)}
+#bar{position:fixed;left:0;right:0;bottom:0;background:var(--sf);border-top:1px solid var(--ln);padding:10px 16px calc(12px + env(safe-area-inset-bottom,0));display:none;z-index:6}
+.in{max-width:680px;margin:0 auto}
+#prog{width:100%;accent-color:var(--gr)}
+.row{display:flex;gap:8px;margin-top:6px}
+.row .t{color:var(--mu);font-size:13px;flex:1}
+.ctl{display:flex;justify-content:center;align-items:center;gap:14px}
+.ic{width:46px;height:46px;border-radius:50%;border:1px solid var(--ln);background:var(--bg);cursor:pointer;font-size:18px}
+#play{width:60px;height:60px;background:linear-gradient(135deg,var(--ac),var(--gr));color:var(--bg);border:0;font-size:22px}
+.opt{display:flex;gap:8px;margin-top:10px}
+.opt select,.opt input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:8px}
+.opt input{max-width:72px;flex:none}
+</style>
+</head>
+<body>
+<header><div class="logo">MB</div><h1>MARCK BOOK</h1><small id="name"></small></header>
+<main>
+ <div id="drop">
+  <b>Ouça seus livros em PDF</b>
+  <p>Escolha o PDF e o MARCK BOOK narra com voz neural.</p>
+  <label class="btn">Abrir PDF<input id="file" type="file" accept="application/pdf" hidden></label>
+ </div>
+ <div id="msg"></div>
+ <div id="lib"></div>
+ <div id="reader"><div id="txt"></div></div>
+</main>
+<div id="bar"><div class="in">
+ <input id="prog" type="range" min="0" value="0" aria-label="Progresso do livro">
+ <div class="row"><span class="t" id="info"></span><span class="t" id="eta" style="text-align:right"></span></div>
+ <div class="ctl">
+  <button class="ic" id="pv" aria-label="Página anterior">⏮</button>
+  <button class="ic" id="bk" aria-label="Trecho anterior">⏪</button>
+  <button class="ic" id="play" aria-label="Ouvir">▶</button>
+  <button class="ic" id="fw" aria-label="Próximo trecho">⏩</button>
+  <button class="ic" id="nx" aria-label="Próxima página">⏭</button>
+ </div>
+ <div class="opt">
+  <select id="voice" aria-label="Voz">
+   <option value="pt-BR-FranciscaNeural">Francisca (BR)</option>
+   <option value="pt-BR-AntonioNeural">Antônio (BR)</option>
+   <option value="pt-BR-ThalitaMultilingualNeural">Thalita (BR)</option>
+   <option value="pt-PT-RaquelNeural">Raquel (PT)</option>
+   <option value="pt-PT-DuarteNeural">Duarte (PT)</option>
+   <option value="device">Voz do aparelho</option>
+  </select>
+  <select id="rate" aria-label="Velocidade"><option value="1" selected>Normal</option><option value="1.5">1,5x</option><option value="2">2x</option><option value="2.25">2,25x</option><option value="2.5">2,5x</option><option value="3">3x</option></select>
+  <input id="go" type="number" min="1" placeholder="Pág.">
+ </div>
+</div></div>
+<audio id="A" preload="auto"></audio>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const SB='https://ybqqptbhlbwbzlaugvqv.supabase.co';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlicXFwdGJobGJ3YnpsYXVndnF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQxMDM0NzMsImV4cCI6MjEwOTY3OTQ3M30.YCSaoiNRzPcc0JA9LvTR3pAEbgskdZ_3C0yDX9QOnqM';
+const H={apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'};
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const A=$('A'),synth=window.speechSynthesis;
+let pages=[],P=0,C=0,playing=false,gen=0,key='',bookId=null,cache=new Map(),lastSave=0;
+const V=()=>$('voice').value,R=()=>+$('rate').value;
+const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+async function sb(path,opt){const r=await fetch(SB+'/rest/v1/'+path,{headers:H,...opt});if(!r.ok)throw new Error(r.status);return r.status===204?null:r.json()}
+async function library(){
+ try{
+  const rows=await sb('books?select=title,pages,progress(page)&order=created_at.desc&limit=6');
+  if(!rows.length)return;
+  const box=$('lib');box.innerHTML='<h2>Seus livros (abra o PDF de novo para continuar)</h2>';
+  rows.forEach(b=>{const d=document.createElement('div');const a=document.createElement('b');a.textContent=b.title;a.style.fontWeight='400';const s=document.createElement('span');const pg=b.progress&&b.progress.page!=null?b.progress.page+1:1;s.textContent='pág. '+pg+' de '+b.pages;d.append(a,s);box.appendChild(d)});
+ }catch(e){}
+}
+library();
+
+function chunk(sents){
+ const out=[];let cur=[],n=0;
+ sents.forEach(s=>{if(n+s.length>850&&cur.length){out.push(cur.join(' '));cur=[];n=0}cur.push(s);n+=s.length+1});
+ if(cur.length)out.push(cur.join(' '));
+ return out;
+}
+function split(t){
+ const out=[];
+ t.split(/(?<=[.!?…:])\s+/).forEach(s=>{
+  s=s.trim();if(!s)return;
+  while(s.length>400){let i=s.lastIndexOf(',',400);if(i<100)i=s.lastIndexOf(' ',400);if(i<1)i=400;out.push(s.slice(0,i+1).trim());s=s.slice(i+1).trim()}
+  if(s)out.push(s);
+ });
+ return out;
+}
+async function load(f){
+ stop();$('msg').textContent='Lendo o PDF…';
+ try{
+  const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
+  pages=[];
+  for(let i=1;i<=pdf.numPages;i++){
+   const c=await (await pdf.getPage(i)).getTextContent();
+   const t=c.items.map(x=>x.str).join(' ').replace(/-\s+(?=[a-zà-ú])/g,'').replace(/\s+/g,' ').trim();
+   pages.push(chunk(split(t)));
+   if(i%10==0)$('msg').textContent='Lendo página '+i+' de '+pdf.numPages+'…';
+  }
+  const chars=pages.flat().join('').length;
+  if(chars<50){$('msg').textContent='Este PDF parece ser imagem escaneada, sem texto para narrar. Use um PDF com texto selecionável.';return}
+  const title=f.name.replace(/\.pdf$/i,'');
+  key='mb2:'+f.name+':'+pdf.numPages;
+  const sv=ls.get(key)||{p:0,c:0};P=Math.min(sv.p,pages.length-1);C=sv.c;
+  try{
+   const b=await sb('books?on_conflict=filename,pages',{method:'POST',headers:{...H,Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify({title,filename:f.name,pages:pdf.numPages,chars})});
+   bookId=b[0].id;
+   const pr=await sb('progress?book_id=eq.'+bookId+'&select=page,sentence');
+   if(pr.length&&!ls.get(key)){P=Math.min(pr[0].page,pages.length-1);C=pr[0].sentence}
+  }catch(e){bookId=null}
+  $('name').textContent=title;
+  $('drop').style.display='none';$('lib').style.display='none';$('msg').textContent='';
+  $('reader').style.display='block';$('bar').style.display='block';
+  $('prog').max=pages.length-1;$('go').max=pages.length;
+  render();
+ }catch(e){$('msg').textContent='Não consegui abrir este PDF. Tente outro arquivo.'}
+}
+function render(){
+ const box=$('txt');box.textContent='';
+ const ch=pages[P];
+ if(!ch.length)box.textContent='(Página sem texto)';
+ ch.forEach((t,i)=>{const p=document.createElement('p');p.textContent=t;p.dataset.i=i;box.appendChild(p)});
+ if(C>=ch.length)C=0;
+ mark();upd();
+}
+function mark(){
+ document.querySelectorAll('#txt p').forEach(e=>e.classList.toggle('on',+e.dataset.i===C));
+ const cur=document.querySelector('#txt p.on');if(cur)cur.scrollIntoView({block:'center',behavior:'smooth'});
+}
+function upd(){
+ $('prog').value=P;
+ $('info').textContent='Página '+(P+1)+' de '+pages.length;
+ let left=pages[P].slice(C).join('').length;
+ for(let i=P+1;i<pages.length;i++)left+=pages[i].join('').length;
+ const m=Math.round(left/(15*R())/60);
+ $('eta').textContent=m>=60?Math.floor(m/60)+' h '+(m%60)+' min restantes':m+' min restantes';
+ ls.set(key,{p:P,c:C});
+ const now=Date.now();
+ if(bookId&&now-lastSave>8000){lastSave=now;save()}
+}
+function save(){if(!bookId)return;sb('progress?on_conflict=book_id',{method:'POST',headers:{...H,Prefer:'resolution=merge-duplicates'},body:JSON.stringify({book_id:bookId,page:P,sentence:C,updated_at:new Date().toISOString()})}).catch(()=>{})}
+
+function nextPos(p=P,c=C){
+ if(c+1<pages[p].length)return[p,c+1];
+ for(let q=p+1;q<pages.length;q++)if(pages[q].length)return[q,0];
+ return null;
+}
+function getAudio(p,c){
+ const k=p+'.'+c+'.'+V();
+ if(!cache.has(k)){
+  cache.set(k,(async()=>{
+   const r=await fetch(SB+'/functions/v1/tts',{method:'POST',headers:H,body:JSON.stringify({text:pages[p][c],voice:V()})});
+   if(!r.ok)throw new Error('voz '+r.status);
+   return URL.createObjectURL(await r.blob());
+  })().catch(e=>{cache.delete(k);throw e}));
+ }
+ return cache.get(k);
+}
+function trim(){if(cache.size>6){const ks=[...cache.keys()];ks.slice(0,ks.length-4).forEach(k=>{cache.get(k).then(u=>URL.revokeObjectURL(u)).catch(()=>{});cache.delete(k)})}}
+
+async function go(){
+ if(!playing)return;
+ const g=++gen;
+ while(P<pages.length&&!pages[P].length){P++;C=0}
+ if(P>=pages.length){P=pages.length-1;C=0;stop();return}
+ if(!document.querySelector('#txt p')||+$('prog').value!==P)render();
+ mark();upd();
+ if(V()==='device')return device(g);
+ try{
+  const u=await getAudio(P,C);
+  if(g!==gen)return;
+  A.src=u;A.playbackRate=R();A.preservesPitch=true;
+  await A.play();
+  meta();
+  const n=nextPos();if(n)getAudio(n[0],n[1]).catch(()=>{});
+  trim();
+ }catch(e){
+  if(g!==gen||!playing)return;
+  $('info').textContent='Voz neural indisponível. Usando a voz do aparelho.';
+  $('voice').value='device';go();
+ }
+}
+function advance(){
+ const n=nextPos();
+ if(!n){stop();return}
+ const pg=n[0]!==P;P=n[0];C=n[1];
+ if(pg)render();
+ go();
+}
+A.onended=()=>{if(playing&&V()!=='device')advance()};
+function device(g){
+ if(!synth){stop();return}
+ synth.cancel();
+ const u=new SpeechSynthesisUtterance(pages[P][C]);
+ u.lang='pt-BR';u.rate=R();
+ u.onend=()=>{if(g===gen&&playing)advance()};
+ synth.speak(u);
+}
+function meta(){
+ try{
+  const ms=navigator.mediaSession;if(!ms)return;
+  ms.metadata=new MediaMetadata({title:'Página '+(P+1)+' de '+pages.length,artist:'MARCK BOOK',album:$('name').textContent});
+  ms.playbackState='playing';
+  [['play',play],['pause',stop],['previoustrack',()=>$('pv').click()],['nexttrack',()=>$('nx').click()],['seekbackward',()=>$('bk').click()],['seekforward',()=>$('fw').click()]].forEach(([a,f])=>{try{ms.setActionHandler(a,f)}catch(e){}});
+ }catch(e){}
+}
+function play(){playing=true;$('play').textContent='⏸';$('play').setAttribute('aria-label','Pausar');go()}
+function stop(){playing=false;gen++;A.pause();if(synth)synth.cancel();$('play').textContent='▶';$('play').setAttribute('aria-label','Ouvir');try{navigator.mediaSession.playbackState='paused'}catch(e){}save()}
+function jump(p,c){
+ const was=playing;if(was){gen++;A.pause();if(synth)synth.cancel()}
+ P=Math.max(0,Math.min(pages.length-1,p));C=c;render();
+ if(was)go();
+}
+$('file').onchange=e=>{if(e.target.files[0])load(e.target.files[0])};
+$('play').onclick=()=>playing?stop():play();
+$('fw').onclick=()=>{const n=nextPos();if(n)jump(n[0],n[1])};
+$('bk').onclick=()=>jump(P,Math.max(0,C-1));
+$('nx').onclick=()=>jump(P+1,0);
+$('pv').onclick=()=>jump(P-1,0);
+$('prog').onchange=e=>jump(+e.target.value,0);
+$('go').onchange=e=>{if(e.target.value)jump(+e.target.value-1,0);e.target.value=''};
+$('txt').onclick=e=>{const el=e.target.closest('p');if(el){const was=playing;jump(P,+el.dataset.i);if(!was)play()}};
+$('rate').onchange=()=>{upd();A.playbackRate=R();if(playing&&V()==='device'){go()}};
+$('voice').onchange=()=>{if(playing)go()};
+document.addEventListener('visibilitychange',()=>{if(playing&&V()==='device'&&synth&&!synth.speaking)go()});
+</script>
+</body>
+</html>
